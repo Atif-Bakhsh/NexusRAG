@@ -1,0 +1,23 @@
+name: Local experiment checks
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.12.9'
+      - run: uv sync --frozen --extra dev
+      - run: uv run ruff check src tests scripts migrations
+      - run: uv run ruff format --check src tests scripts migrations
+      - run: uv run mypy src
+      - run: uv run pytest -q
+      - run: uv run nexusrag validate
+      - run: docker compose up -d --wait postgres neo4j
+      - run: uv run alembic upgrade head
+      - run: RUN_INTEGRATION=1 uv run pytest -q tests/test_integration.py
+      - run: docker compose build api ui
+      - if: always()
+        run: docker compose down

@@ -1,0 +1,94 @@
+{
+  "corpus_version": "astronomy-a471a5d079a2",
+  "repository_commit": "a471a5d079a2c4aa02283f606babf339acf4ff48",
+  "repository": "https://github.com/open-telemetry/opentelemetry.io",
+  "license": "CC-BY-4.0",
+  "attribution": "OpenTelemetry Authors",
+  "modification_notice": "Markdown files retained verbatim; derived chunks and labels are NexusRAG transformations.",
+  "documents": [
+    {
+      "document_id": "architecture",
+      "path": "docs/architecture.md",
+      "repository_path": "content/en/docs/demo/architecture.md",
+      "source_url": "https://github.com/open-telemetry/opentelemetry.io/blob/a471a5d079a2c4aa02283f606babf339acf4ff48/content/en/docs/demo/architecture.md",
+      "sha256": "1290f0daaed976e844fcc2ae1f222d6c70f27e9c00684bec19602078d51e4c9b"
+    },
+    {
+      "document_id": "services",
+      "path": "docs/services.md",
+      "repository_path": "content/en/docs/demo/services/_index.md",
+      "source_url": "https://github.com/open-telemetry/opentelemetry.io/blob/a471a5d079a2c4aa02283f606babf339acf4ff48/content/en/docs/demo/services/_index.md",
+      "sha256": "6bb787f8794155b4965dfc73df3158bd962a934d619c6e223cba2e3e6755709a"
+    },
+    {
+      "document_id": "frontend",
+      "path": "docs/frontend.md",
+      "repository_path": "content/en/docs/demo/services/frontend.md",
+      "source_url": "https://github.com/open-telemetry/opentelemetry.io/blob/a471a5d079a2c4aa02283f606babf339acf4ff48/content/en/docs/demo/services/frontend.md",
+      "sha256": "094b5fea66f1feff30a99ca864985526fce73b21a79c436a9f3835f441fbb822"
+    },
+    {
+      "document_id": "checkout",
+      "path": "docs/checkout.md",
+      "repository_path": "content/en/docs/demo/services/checkout.md",
+      "source_url": "https://github.com/open-telemetry/opentelemetry.io/blob/a471a5d079a2c4aa02283f606babf339acf4ff48/content/en/docs/demo/services/checkout.md",
+      "sha256": "d981f325df8602c0ef9ff9dc2d0bcfbbaef7740f4153e0fae0a1922df47c5e66"
+    },
+    {
+      "document_id": "cart",
+      "path": "docs/cart.md",
+      "repository_path": "content/en/docs/demo/services/cart/index.md",
+      "source_url": "https://github.com/open-telemetry/opentelemetry.io/blob/a471a5d079a2c4aa02283f606babf339acf4ff48/content/en/docs/demo/services/cart/index.md",
+      "sha256": "5435d522b9e3975cd2a8b6a9f5f255409655c71a8b45a85ab7f2d6f4ca209ae4"
+    },
+    {
+      "document_id": "kafka",
+      "path": "docs/kafka.md",
+      "repository_path": "content/en/docs/demo/services/kafka.md",
+      "source_url": "https://github.com/open-telemetry/opentelemetry.io/blob/a471a5d079a2c4aa02283f606babf339acf4ff48/content/en/docs/demo/services/kafka.md",
+      "sha256": "af62b782cfe7bed7f7c35f6e3fce54d76788592cf2932182a5fcdf5cb5585d11"
+    },
+    {
+      "document_id": "accounting",
+      "path": "docs/accounting.md",
+      "repository_path": "content/en/docs/demo/services/accounting.md",
+      "source_url": "https://github.com/open-telemetry/opentelemetry.io/blob/a471a5d079a2c4aa02283f606babf339acf4ff48/content/en/docs/demo/services/accounting.md",
+      "sha256": "a8485aff1acf72d3f376828a48e101110436f2efc7912c15f9987b5589dbde9e"
+    },
+    {
+      "document_id": "fraud-detection",
+      "path": "docs/fraud-detection.md",
+      "repository_path": "content/en/docs/demo/services/fraud-detection.md",
+      "source_url": "https://github.com/open-telemetry/opentelemetry.io/blob/a471a5d079a2c4aa02283f606babf339acf4ff48/content/en/docs/demo/services/fraud-detection.md",
+      "sha256": "86c7026dc50ca43f4406ce58370e73532d0427799a5dc9eba0d69e048fae752a"
+    },
+    {
+      "document_id": "shipping",
+      "path": "docs/shipping.md",
+      "repository_path": "content/en/docs/demo/services/shipping.md",
+      "source_url": "https://github.com/open-telemetry/opentelemetry.io/blob/a471a5d079a2c4aa02283f606babf339acf4ff48/content/en/docs/demo/services/shipping.md",
+      "sha256": "2484146daeb05d05c1978a5ab9e1537c1704be3e0ad9f301155297086693fd7c"
+    },
+    {
+      "document_id": "quote",
+      "path": "docs/quote.md",
+      "repository_path": "content/en/docs/demo/services/quote.md",
+      "source_url": "https://github.com/open-telemetry/opentelemetry.io/blob/a471a5d079a2c4aa02283f606babf339acf4ff48/content/en/docs/demo/services/quote.md",
+      "sha256": "274a735298ef6c289169820c79921dc26e3eff247398234efaaaea179eca0593"
+    },
+    {
+      "document_id": "recommendation",
+      "path": "docs/recommendation.md",
+      "repository_path": "content/en/docs/demo/services/recommendation.md",
+      "source_url": "https://github.com/open-telemetry/opentelemetry.io/blob/a471a5d079a2c4aa02283f606babf339acf4ff48/content/en/docs/demo/services/recommendation.md",
+      "sha256": "23fa35f1eb6071ecd2f2e32801850d91dd4a6c2284a54bdac48149e26d4716e7"
+    },
+    {
+      "document_id": "product-catalog",
+      "path": "docs/product-catalog.md",
+      "repository_path": "content/en/docs/demo/services/product-catalog.md",
+      "source_url": "https://github.com/open-telemetry/opentelemetry.io/blob/a471a5d079a2c4aa02283f606babf339acf4ff48/content/en/docs/demo/services/product-catalog.md",
+      "sha256": "18ebf4b7acc0eca8ddf1a865ac0fa752cc411a75f06e4d34803514007ac11f3a"
+    }
+  ]
+}

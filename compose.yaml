@@ -1,0 +1,64 @@
+name: nexusrag
+services:
+  postgres:
+    image: pgvector/pgvector:0.8.0-pg17
+    environment:
+      POSTGRES_DB: nexusrag
+      POSTGRES_USER: nexusrag
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nexusrag-local-only}
+    ports: ["127.0.0.1:55433:5432"]
+    volumes: ["postgres_data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexusrag -d nexusrag"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  neo4j:
+    image: neo4j:5.26.4-community
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-nexusrag-local-only}
+      NEO4J_server_memory_heap_initial__size: 256m
+      NEO4J_server_memory_heap_max__size: 512m
+      NEO4J_server_memory_pagecache_size: 256m
+      NEO4J_db_transaction_timeout: 2s
+    ports: ["127.0.0.1:57474:7474", "127.0.0.1:57687:7687"]
+    volumes: ["neo4j_data:/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:7474 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+  api:
+    build: .
+    command: ["sh", "-c", "alembic upgrade head && uvicorn nexusrag.api.app:app --host 0.0.0.0 --port 8000"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://nexusrag:${POSTGRES_PASSWORD:-nexusrag-local-only}@postgres:5432/nexusrag
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-nexusrag-local-only}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      API_BUDGET_USD: ${API_BUDGET_USD:-50}
+      HF_HOME: /app/.cache/huggingface
+      TIKTOKEN_CACHE_DIR: /app/.cache/tiktoken
+    ports: ["127.0.0.1:58000:8000"]
+    volumes: ["./artifacts:/app/artifacts", "./results:/app/results", "model_cache:/app/.cache"]
+    depends_on:
+      postgres: {condition: service_healthy}
+      neo4j: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+  ui:
+    build: .
+    command: ["streamlit", "run", "src/nexusrag/ui.py", "--server.address=0.0.0.0", "--server.port=8501", "--browser.gatherUsageStats=false"]
+    environment:
+      API_BASE_URL: http://api:8000
+    ports: ["127.0.0.1:58501:8501"]
+    volumes: ["./results:/app/results:ro"]
+    depends_on:
+      api: {condition: service_healthy}
+volumes:
+  postgres_data:
+  neo4j_data:
+  model_cache:

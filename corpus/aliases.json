@@ -1,0 +1,255 @@
+{
+  "version": "astronomy-aliases-v1",
+  "entities": [
+    {
+      "entity_id": "accounting",
+      "name": "Accounting",
+      "entity_type": "Service",
+      "aliases": [
+        "accountingservice",
+        "Accounting Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "ad",
+      "name": "Ad",
+      "entity_type": "Service",
+      "aliases": [
+        "adservice",
+        "Ad Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "agent",
+      "name": "Agent",
+      "entity_type": "Service",
+      "aliases": [
+        "agentservice",
+        "Agent Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "cart",
+      "name": "Cart",
+      "entity_type": "Service",
+      "aliases": [
+        "cartservice",
+        "Cart Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "chatbot",
+      "name": "Chatbot",
+      "entity_type": "Service",
+      "aliases": [
+        "chatbotservice",
+        "Chatbot Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "checkout",
+      "name": "Checkout",
+      "entity_type": "Service",
+      "aliases": [
+        "checkoutservice",
+        "Checkout Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "currency",
+      "name": "Currency",
+      "entity_type": "Service",
+      "aliases": [
+        "currencyservice",
+        "Currency Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "email",
+      "name": "Email",
+      "entity_type": "Service",
+      "aliases": [
+        "emailservice",
+        "Email Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "flagd",
+      "name": "Flagd",
+      "entity_type": "Service",
+      "aliases": [
+        "flagdservice",
+        "Flagd Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "flagd-ui",
+      "name": "Flagd UI",
+      "entity_type": "Service",
+      "aliases": [
+        "flagduiservice",
+        "Flagd UI Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "fraud-detection",
+      "name": "Fraud Detection",
+      "entity_type": "Service",
+      "aliases": [
+        "frauddetectionservice",
+        "Fraud Detection Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "frontend",
+      "name": "Frontend",
+      "entity_type": "Service",
+      "aliases": [
+        "frontendservice",
+        "Frontend Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "frontend-proxy",
+      "name": "Frontend Proxy",
+      "entity_type": "Service",
+      "aliases": [
+        "frontendproxyservice",
+        "Frontend Proxy Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "image-provider",
+      "name": "Image Provider",
+      "entity_type": "Service",
+      "aliases": [
+        "imageproviderservice",
+        "Image Provider Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "load-generator",
+      "name": "Load Generator",
+      "entity_type": "Service",
+      "aliases": [
+        "loadgeneratorservice",
+        "Load Generator Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "mcp",
+      "name": "MCP",
+      "entity_type": "Service",
+      "aliases": [
+        "mcpservice",
+        "MCP Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "payment",
+      "name": "Payment",
+      "entity_type": "Service",
+      "aliases": [
+        "paymentservice",
+        "Payment Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "product-catalog",
+      "name": "Product Catalog",
+      "entity_type": "Service",
+      "aliases": [
+        "productcatalogservice",
+        "Product Catalog Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "quote",
+      "name": "Quote",
+      "entity_type": "Service",
+      "aliases": [
+        "quoteservice",
+        "Quote Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "recommendation",
+      "name": "Recommendation",
+      "entity_type": "Service",
+      "aliases": [
+        "recommendationservice",
+        "Recommendation Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "shipping",
+      "name": "Shipping",
+      "entity_type": "Service",
+      "aliases": [
+        "shippingservice",
+        "Shipping Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "react-native-app",
+      "name": "React Native App",
+      "entity_type": "Service",
+      "aliases": [
+        "reactnativeappservice",
+        "React Native App Service"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "cache",
+      "name": "Valkey",
+      "entity_type": "DataStore",
+      "aliases": [
+        "cache",
+        "cart cache"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "postgresql",
+      "name": "PostgreSQL",
+      "entity_type": "DataStore",
+      "aliases": [
+        "astronomy-db",
+        "postgres"
+      ],
+      "mentions": []
+    },
+    {
+      "entity_id": "kafka",
+      "name": "Kafka",
+      "entity_type": "MessageBroker",
+      "aliases": [
+        "queue",
+        "kafka broker"
+      ],
+      "mentions": []
+    }
+  ]
+}

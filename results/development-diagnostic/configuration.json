@@ -1,0 +1,53 @@
+{
+  "settings": {
+    "generation_model": "gpt-5.4-mini-2026-03-17",
+    "embedding_model": "BAAI/bge-small-en-v1.5",
+    "embedding_revision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+    "corpus_dir": "corpus",
+    "artifact_dir": "artifacts",
+    "results_dir": "results/runs",
+    "api_budget_usd": 50.0,
+    "input_usd_per_million": 0.75,
+    "output_usd_per_million": 4.5,
+    "candidate_k": 20,
+    "context_chunks": 8,
+    "context_tokens": 3000,
+    "max_output_tokens": 1800,
+    "prompt_version": "grounded-v1",
+    "extraction_prompt_version": "ontology-v1",
+    "chunker_version": "markdown-lines-v1",
+    "graph_source": "llm"
+  },
+  "corpus_version": "astronomy-a471a5d079a2-bc8b978450",
+  "ingestion_configuration": {
+    "generation_model": "gpt-5.4-mini-2026-03-17",
+    "embedding_model": "BAAI/bge-small-en-v1.5",
+    "embedding_revision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+    "corpus_dir": "corpus",
+    "artifact_dir": "artifacts",
+    "results_dir": "results/runs",
+    "api_budget_usd": 50.0,
+    "input_usd_per_million": 0.75,
+    "output_usd_per_million": 4.5,
+    "candidate_k": 20,
+    "context_chunks": 8,
+    "context_tokens": 3000,
+    "max_output_tokens": 1800,
+    "prompt_version": "grounded-v1",
+    "extraction_prompt_version": "ontology-v1",
+    "chunker_version": "markdown-lines-v1",
+    "graph_source": "mermaid_fixture"
+  },
+  "labels_sha256": "5dab7c94c1871f2c0c9dcd1eb669c0e59b9cae69891824db1aca3ea8b295156b",
+  "split": "dev",
+  "generation": false,
+  "repeats": 1,
+  "human_labels_complete": false,
+  "diagnostic_only": true,
+  "hardware": {
+    "platform": "macOS-27.0-arm64-arm-64bit",
+    "processor": "arm"
+  },
+  "concurrency": 1,
+  "warmup": "one embedding; no database-query warmup"
+}

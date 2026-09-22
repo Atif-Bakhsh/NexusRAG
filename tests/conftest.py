@@ -6,6 +6,16 @@ from nexusrag.ingestion.corpus import digest
 from nexusrag.models import Assertion, Chunk, Mention
 
 
+@pytest.fixture(autouse=True)
+def forbid_live_provider(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "")
+
+    def blocked(*args, **kwargs):
+        raise AssertionError("Live provider calls are forbidden in tests")
+
+    monkeypatch.setattr("nexusrag.generation.llm.OpenAI", blocked)
+
+
 def pytest_collection_modifyitems(config, items):
     for item in items:
         if "integration" in item.keywords and os.getenv("RUN_INTEGRATION") != "1":

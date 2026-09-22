@@ -63,3 +63,24 @@ def test_unreviewed_scores_rejected(tmp_path):
     write_fixture(tmp_path, reviewer="")
     with pytest.raises(ValueError, match="reviewer"):
         score_judgments(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("supported_cited_claims", "2"),
+        ("claims_with_supporting_citations", "2"),
+    ],
+)
+def test_inconsistent_human_support_counts_rejected(tmp_path, field, value):
+    write_fixture(tmp_path)
+    path = tmp_path / "judgments.csv"
+    with path.open() as file:
+        rows = list(csv.DictReader(file))
+    rows[0][field] = value
+    with path.open("w") as file:
+        writer = csv.DictWriter(file, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    with pytest.raises(ValueError, match="Inconsistent"):
+        score_judgments(tmp_path)

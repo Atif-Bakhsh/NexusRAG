@@ -117,6 +117,19 @@ def test_graph_timeout_is_explicit(databases):
             list(session.run(Query("UNWIND range(1,100000000) AS n RETURN sum(n)", timeout=0.001)))
 
 
+def test_graph_readiness_detects_missing_relationship(databases):
+    _, graph, version, _, assertions, _ = databases
+    assert graph.ready(version)
+    assert len(graph.assertions(version)) == len(assertions)
+    with graph.driver.session() as session:
+        session.run(
+            "MATCH ()-[r {assertion_id:$id}]->() DELETE r", id=assertions[0].assertion_id
+        ).consume()
+    assert not graph.ready(version)
+    graph.import_assertions(version, list(Registry().entities.values()), assertions)
+    assert graph.ready(version)
+
+
 def test_graph_twenty_path_cap_reports_truncation(databases, make_assertion, make_chunk):
     from nexusrag.models import Entity
 

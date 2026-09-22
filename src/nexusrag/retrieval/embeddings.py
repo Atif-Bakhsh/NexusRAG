@@ -6,15 +6,19 @@ QUERY_PREFIX = "Represent this sentence for searching relevant passages: "
 
 
 class Embedder:
-    def __init__(self, settings: Settings):
+    def __init__(self, settings: Settings, *, local_files_only: bool = False):
         self.settings = settings
+        self.local_files_only = local_files_only
 
     @cached_property
     def model(self):
         from sentence_transformers import SentenceTransformer
 
         return SentenceTransformer(
-            self.settings.embedding_model, revision=self.settings.embedding_revision, device="cpu"
+            self.settings.embedding_model,
+            revision=self.settings.embedding_revision,
+            device="cpu",
+            local_files_only=self.local_files_only,
         )
 
     def count(self, text: str) -> int:

@@ -34,10 +34,19 @@ class QueryService:
         self.graph = graph or GraphStore(settings)
         self.registry = registry or Registry(settings.corpus_dir / "aliases.json")
 
-    def ask(self, request: AskRequest, generate: bool = True, llm=None) -> dict:
+    def ask(
+        self,
+        request: AskRequest,
+        generate: bool = True,
+        llm=None,
+        *,
+        expected_corpus_version: str | None = None,
+    ) -> dict:
         started = time.perf_counter()
         active = self.repository.active()
         version = active.version
+        if expected_corpus_version is not None and version != expected_corpus_version:
+            raise RuntimeError("Active corpus changed during evaluation; discard this run")
         if request.document_filter is not None:
             allowed = {d["document_id"] for d in active.manifest["documents"]}
             if not set(request.document_filter) <= allowed:

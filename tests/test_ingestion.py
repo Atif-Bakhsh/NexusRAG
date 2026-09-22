@@ -25,7 +25,7 @@ def test_manifest_and_all_labels_are_valid():
     assert len(manifest.documents) == len(documents) == 12
     assert len(questions) == 40
     assert sum(q.split == "dev" for q in questions) == 16
-    assert all(q.review_status == "source_checked_by_agent" for q in questions)
+    assert all(q.reviewer for q in questions if q.review_status == "human_reviewed")
 
 
 def test_chunks_preserve_lines_fences_limits_and_identity():
@@ -65,6 +65,26 @@ def test_tampered_manifest_is_rejected(tmp_path):
     (tmp_path / "corpus/docs/cart.md").write_text("changed")
     with pytest.raises(ValueError, match="Checksum"):
         load_corpus(tmp_path / "corpus")
+
+
+def test_index_identity_includes_manifest_content(tmp_path):
+    import json
+    import shutil
+    from types import SimpleNamespace
+
+    from nexusrag.ingestion.pipeline import prepare
+
+    root = tmp_path / "corpus"
+    shutil.copytree("corpus", root)
+    settings = Settings(corpus_dir=root)
+    embedder = SimpleNamespace(count=lambda text: len(text.split()))
+    first, _ = prepare(settings, embedder)
+    path = root / "manifest.json"
+    manifest = json.loads(path.read_text())
+    manifest["modification_notice"] += " Metadata revised."
+    path.write_text(json.dumps(manifest))
+    second, _ = prepare(settings, embedder)
+    assert first.corpus_version != second.corpus_version
 
 
 @pytest.mark.model

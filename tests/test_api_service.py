@@ -114,3 +114,43 @@ def test_unknown_document_filter_rejected(fake_service):
         fake_service[0].ask(
             AskRequest(question="What is Checkout?", document_filter=["unknown"]), llm=GoodLLM()
         )
+
+
+def test_evaluation_corpus_change_aborts_before_retrieval(fake_service):
+    svc, records = fake_service
+    with pytest.raises(RuntimeError, match="corpus changed"):
+        svc.ask(
+            AskRequest(question="What is Checkout?"),
+            generate=False,
+            expected_corpus_version="different-version",
+        )
+    assert not records
+
+
+def test_api_paid_disabled_returns_failure_record_and_releases_lock(fake_service):
+    svc, records = fake_service
+    svc.settings.disable_paid_api = True
+    client = TestClient(app)
+    for _ in range(2):
+        response = client.post("/ask", json={"question": "What is Checkout?"})
+        assert response.status_code == 502
+        query_id = response.json()["detail"]["query_id"]
+        assert records[query_id]["trace"]["calls"] == []
+        assert client.get(f"/queries/{query_id}").status_code == 200
+    assert not client.get("/ready").json()["generation_configured"]
+
+
+def test_api_busy_and_unready_fail_explicitly(fake_service, monkeypatch):
+    from nexusrag.api.app import query_lock
+
+    client = TestClient(app)
+    with query_lock:
+        assert client.post("/ask", json={"question": "What is Checkout?"}).status_code == 429
+
+    def unavailable():
+        raise LookupError("private internal message")
+
+    monkeypatch.setattr(fake_service[0].repository, "active", unavailable)
+    assert client.get("/ready").status_code == 503
+    response = client.post("/ask", json={"question": "What is Checkout?"})
+    assert response.status_code == 503 and "private" not in response.text

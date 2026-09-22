@@ -1,4 +1,11 @@
 .env
+.env.*
+!.env.example
+*.sqlite*
+*.db
+*.log
+*.pem
+*.key
 .venv
 .git
 .cache

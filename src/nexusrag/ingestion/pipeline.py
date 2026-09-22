@@ -29,6 +29,7 @@ def prepare(settings: Settings, embedder: Embedder):
     # Index identity includes all settings that can change chunk/graph semantics.
     identity = {
         "source_version": manifest.corpus_version,
+        "manifest_sha256": digest(manifest.model_dump_json()),
         "chunker": settings.chunker_version,
         "embedding": settings.embedding_model,
         "embedding_revision": settings.embedding_revision,
@@ -92,6 +93,7 @@ def ingest(settings: Settings, assertions_file: Path | None = None) -> dict:
                         Assertion.model_validate(a) for a in json.loads(cache.read_text())
                     )
                     continue
+                call_start = len(llm.calls)
                 try:
                     extracted = llm.generate(
                         Extraction,
@@ -103,7 +105,7 @@ def ingest(settings: Settings, assertions_file: Path | None = None) -> dict:
                         max_output=4000,
                     )
                 finally:
-                    if llm.calls:
+                    if len(llm.calls) > call_start:
                         with (artifact / "extraction_calls.jsonl").open("a") as usage:
                             usage.write(
                                 json.dumps({"chunk_id": chunk.chunk_id, **llm.calls[-1]}) + "\n"
@@ -121,7 +123,7 @@ def ingest(settings: Settings, assertions_file: Path | None = None) -> dict:
         for assertion in assertions:
             if assertion.corpus_version != manifest.corpus_version:
                 raise ValueError("Assertion artifact belongs to another corpus")
-            validate_extraction(
+            validated = validate_extraction(
                 Extraction.model_validate(
                     dict(
                         assertions=[
@@ -143,6 +145,13 @@ def ingest(settings: Settings, assertions_file: Path | None = None) -> dict:
                 assertion.extraction_model,
                 assertion.prompt_version,
             )
+            if assertion.assertion_id != validated[0].assertion_id or (
+                assertion.subject != validated[0].subject or assertion.object != validated[0].object
+            ):
+                raise ValueError("Assertion artifact has a noncanonical identity")
+            is_fixture = assertion.extraction_model == "deterministic-mermaid-fixture"
+            if is_fixture != (settings.graph_source == "mermaid_fixture"):
+                raise ValueError("Assertion artifact graph source mismatch")
         assertions = list({a.assertion_id: a for a in assertions}.values())
         for assertion in assertions:
             for eid in (assertion.subject, assertion.object):

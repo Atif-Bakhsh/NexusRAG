@@ -33,7 +33,9 @@ def test_provider_configuration_usage_and_malformed_output_accounting(tmp_path, 
         "nexusrag.generation.llm.OpenAI", lambda **kwargs: SimpleNamespace(responses=Responses())
     )
     monkeypatch.setattr("nexusrag.generation.llm.token_count", len)
-    settings = Settings(openai_api_key=SecretStr("test-only"), artifact_dir=tmp_path)
+    settings = Settings(
+        openai_api_key=SecretStr("test-only"), artifact_dir=tmp_path, disable_paid_api=False
+    )
     llm = LLM(settings)
     with pytest.raises(ValueError):
         llm.generate(Answer, "Instructions", {"question": "Question"})
@@ -46,7 +48,7 @@ def test_provider_configuration_usage_and_malformed_output_accounting(tmp_path, 
 
 
 def test_missing_key_fails_before_reserving_budget(tmp_path):
-    llm = LLM(Settings(openai_api_key=SecretStr(""), artifact_dir=tmp_path))
+    llm = LLM(Settings(openai_api_key=SecretStr(""), artifact_dir=tmp_path, disable_paid_api=False))
     with pytest.raises(RuntimeError, match="api_key_missing"):
         llm.generate(Answer, "Instructions", {})
     assert not (tmp_path / "spend.sqlite").exists()

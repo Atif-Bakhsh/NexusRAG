@@ -11,6 +11,11 @@ def main():
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("validate", help="Validate frozen corpus and draft evaluation labels")
     commands.add_parser("download-model", help="Download pinned BGE weights and tokenizers")
+    preflight = commands.add_parser(
+        "preflight", help="Read-only checks; no downloads or paid calls"
+    )
+    preflight.add_argument("--require-ready", action="store_true")
+    preflight.add_argument("--require-generation", action="store_true")
     ingestion = commands.add_parser("ingest", help="Sequential, idempotent ingestion")
     ingestion.add_argument(
         "--assertions", type=Path, help="Reuse exported assertions without LLM calls"
@@ -34,7 +39,24 @@ def main():
     score = commands.add_parser("score", help="Aggregate complete human judgments")
     score.add_argument("run_dir", type=Path)
     args = parser.parse_args()
-    settings = Settings()
+    try:
+        settings = Settings()
+    except ValueError:
+        print(
+            json.dumps(
+                {
+                    "status": "failed",
+                    "error": "Invalid environment settings; see docs/CONFIGURATION.md",
+                }
+            )
+        )
+        sys.exit(1)
+    if args.command == "preflight":
+        from nexusrag.preflight import run as preflight_run
+
+        result = preflight_run(settings, args.require_ready, args.require_generation)
+        print(json.dumps(result, indent=2))
+        sys.exit(1 if result["status"] == "failed" else 0)
     if args.command == "validate":
         from nexusrag.evaluation.runner import load_questions
         from nexusrag.ingestion.corpus import load_corpus

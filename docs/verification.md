@@ -1,4 +1,4 @@
-# Implementation verification
+# Initial implementation verification (historical)
 
 Checked locally on 2026-09-20 with Python 3.12, the committed `uv.lock`, CPU BGE,
 PostgreSQL 17/pgvector 0.8.0 and Neo4j Community 5.26.4.

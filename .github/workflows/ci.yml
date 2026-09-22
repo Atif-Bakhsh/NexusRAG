@@ -1,9 +1,14 @@
 name: Local experiment checks
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
+    env:
+      DISABLE_PAID_API: "true"
+      OPENAI_API_KEY: ""
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
@@ -19,5 +24,9 @@ jobs:
       - run: uv run alembic upgrade head
       - run: RUN_INTEGRATION=1 uv run pytest -q tests/test_integration.py
       - run: docker compose build api ui
+      - run: docker compose up -d --wait api ui
+      - run: docker compose exec -T api nexusrag download-model
+      - run: docker compose exec -T api nexusrag ingest --fixture-graph
+      - run: uv run python scripts/smoke.py
       - if: always()
         run: docker compose down

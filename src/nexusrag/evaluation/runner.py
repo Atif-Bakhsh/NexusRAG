@@ -77,6 +77,7 @@ def run(
         "warmup": "one embedding; no database-query warmup",
     }
     (output / "configuration.json").write_text(json.dumps(configuration, indent=2))
+    (output / "questions.jsonl").write_bytes(labels_path.read_bytes())
     records = []
     svc.embedder.query("warmup")
     try:
@@ -98,6 +99,7 @@ def run(
                         result = svc.ask(
                             AskRequest.model_validate(dict(question=question.question, mode=mode)),
                             generate=generate,
+                            expected_corpus_version=active.version,
                         )
                         trace = result["trace"]
                         candidate_ids = [c["chunk_id"] for c in trace.get("vector_candidates", [])]

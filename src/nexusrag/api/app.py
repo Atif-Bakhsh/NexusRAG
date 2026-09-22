@@ -46,7 +46,8 @@ def ready():
             "status": "ready",
             "corpus_version": active.version,
             "graph_source": getattr(active, "configuration", {}).get("graph_source", "unknown"),
-            "generation_configured": bool(svc.settings.openai_api_key.get_secret_value()),
+            "generation_configured": bool(svc.settings.openai_api_key.get_secret_value())
+            and not svc.settings.disable_paid_api,
         }
     except Exception:
         raise HTTPException(

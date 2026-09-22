@@ -69,6 +69,8 @@ class LLM:
     def generate(
         self, schema: type[T], instructions: str, payload: dict, max_output: int | None = None
     ) -> T:
+        if self.settings.disable_paid_api:
+            raise RuntimeError("paid_api_disabled")
         if not self.settings.openai_api_key.get_secret_value():
             raise RuntimeError("openai_api_key_missing")
         output_limit = max_output or self.settings.max_output_tokens

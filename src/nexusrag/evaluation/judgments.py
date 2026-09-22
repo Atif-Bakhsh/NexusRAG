@@ -43,6 +43,8 @@ def score_judgments(run_dir: Path) -> dict:
             and counts["claims_with_supporting_citations"]
             <= counts["supported_claims"]
             <= counts["factual_claims"]
+            and counts["supported_cited_claims"] <= counts["supported_claims"]
+            and counts["claims_with_supporting_citations"] <= counts["supported_cited_claims"]
         ):
             raise ValueError("Inconsistent claim counts")
         if j["failure_stage"] not in (

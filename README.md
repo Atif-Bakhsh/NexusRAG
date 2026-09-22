@@ -1,162 +1,108 @@
 # NexusRAG
 
-**Comparing Vector and Knowledge-Graph Retrieval for Architecture Documentation.**
+**Comparing Vector and Knowledge-Graph Retrieval for Architecture Documentation**
 
-The initial **retrieval-only development diagnostic** used 12 frozen documents and 16 questions.
-Both modes found complete labeled evidence for 11/12 answerable questions; the other four ask
-for clarification or unsupported conclusions. This is provisional: the graph was derived from
-explicit Mermaid edges, labels await human review, and answer generation was not measured.
-See [the measurement report](docs/report.md) for reproducible outputs and limitations.
+[![Checks](https://github.com/Atif-Bakhsh/NexusRAG/actions/workflows/ci.yml/badge.svg)](https://github.com/Atif-Bakhsh/NexusRAG/actions/workflows/ci.yml)
 
-NexusRAG is a local FastAPI + Streamlit application with exact pgvector search, CPU BGE
-embeddings, evidence-backed Neo4j paths, structured OpenAI generation and an explicit paired
-evaluation workflow. It reads Astronomy Shop documentation; it does not run Astronomy Shop.
+**Current finding:** both retrieval modes found complete labeled evidence for **11/12
+answerable development questions (91.7%)**, across **12 frozen documents**. This is a
+retrieval-only diagnostic using a **Mermaid-derived fixture graph**, with labels awaiting
+independent human review. Generated-answer quality and LLM extraction are not measured yet.
+[Raw results and limitations →](docs/report.md)
 
-## Run locally
+Architecture questions often require following relationships across services, stores and
+brokers. NexusRAG tests whether adding explicit, source-backed graph paths helps compared
+with a vector-only baseline. It preserves the evidence so an engineer can inspect where an
+answer came from. It reads Astronomy Shop documentation; it does not run Astronomy Shop.
 
-Requirements: Docker Desktop/Compose, internet for the initial image/model downloads and an
-OpenAI API key for LLM extraction/generation. Around 16 GB RAM is recommended. No hosting,
-GPU, cloud services or Astronomy Shop installation is required.
+## What is built
+
+- Two retrieval modes: exact vector search and graph + vector, plus independent UI comparison.
+- 128 source-located chunks from 12 commit-pinned Markdown documents.
+- 384-dimensional CPU BGE embeddings and a 35-assertion diagnostic graph.
+- Four bounded graph-query families, with source evidence for each relationship.
+- Structured generation, citation validation, query traces, token/cost accounting and a paid-call disable switch.
+- A 40-question evaluation set: 16 development / 24 held-out, with a human judgment workflow.
+
+**Stack:** Python 3.12 · FastAPI · Pydantic · PostgreSQL/pgvector · Neo4j Community ·
+Sentence Transformers/BGE · OpenAI SDK · Streamlit · SQLAlchemy/Alembic · Docker Compose · pytest.
+
+```mermaid
+flowchart LR
+    D[Pinned Markdown] --> C[Chunks and provenance]
+    C --> V[Local BGE and pgvector]
+    C --> G[Validated assertions and Neo4j]
+    U[Streamlit] --> A[FastAPI]
+    A --> V
+    A --> G
+    V --> E[Equal-budget evidence selection]
+    G --> E
+    E --> R[Grounded generation and citation checks]
+    R --> U
+```
+
+## Run the free local demo
+
+Requires Docker Desktop/Compose and internet for initial image/model downloads.
+Around 16 GB RAM is recommended. No API key is needed for this workflow.
 
 ```sh
+git clone https://github.com/Atif-Bakhsh/NexusRAG.git
+cd NexusRAG
 cp .env.example .env
-# Set OPENAI_API_KEY in .env for extraction/generation. Do not commit this file.
-docker compose up -d --build
-# Download the pinned BGE model and generation tokenizer into the persistent model cache.
-docker compose exec api nexusrag download-model
-# Paid extraction, guarded by the local $50 application budget:
-docker compose exec api nexusrag ingest
-```
-
-Open [Streamlit](http://127.0.0.1:58501), [API docs](http://127.0.0.1:58000/docs), or
-[Neo4j Browser](http://127.0.0.1:57474). Databases use the local credentials in `.env.example`;
-all published ports bind to loopback. `/health` is liveness; `/ready` requires both databases
-and a fully ingested corpus, and separately reports whether generation is configured.
-
-For an **unpaid smoke test**, use the explicit fixture instead of paid ingestion:
-
-```sh
-docker compose exec api nexusrag ingest --fixture-graph
-docker compose exec api nexusrag ask 'Trace Frontend → Checkout → Shipping → Quote.' \
+DISABLE_PAID_API=true docker compose up -d --build --wait
+docker compose exec -T api nexusrag download-model
+docker compose exec -T api nexusrag ingest --fixture-graph
+docker compose exec -T api nexusrag preflight --require-ready
+docker compose exec -T api nexusrag ask \
+  'How does Checkout reach Quote through Shipping?' \
   --mode graph_vector --retrieval-only
-docker compose exec api nexusrag evaluate --split dev --allow-unreviewed
 ```
 
-The fixture uses actual frozen source lines and actual BGE vectors. It is separately versioned
-and labeled `mermaid_fixture`, never represented as LLM extraction. Generation still requires
-a key. Streamlit reports missing configuration rather than fabricating answers. Re-ingest
-without `--fixture-graph` when ready for the actual experiment; the newest ready version is used.
+Inspect returned evidence, paths and the query ID. Open [Streamlit](http://127.0.0.1:58501)
+to load that ID in **Evidence and execution**, or view the committed diagnostic in
+**Benchmark results**. [API docs](http://127.0.0.1:58000/docs) expose the seven endpoint patterns.
 
-Stop with `docker compose down`; named database/model volumes and local artifacts remain.
-Do not delete `artifacts/spend.sqlite` to reset spending. The budget is an application estimate,
-not an invoice; failed calls with unknown usage retain their conservative reservations.
+The UI's Ask/Compare flow generates answers and needs explicit live configuration.
+The free CLI retrieves real evidence without fabricating an answer.
+Stop with `docker compose down`; database/model volumes and artifacts remain.
 
-## Python development
+## How the experiment is evaluated
 
-Python 3.12 and uv 0.12.9; exact dependency versions and hashes are in `uv.lock`.
-Linux PyTorch resolves from the CPU-only index. Other platforms use their native PyPI wheels.
+Both modes use the same snapshot, embedding model, generator, prompt and limits:
+up to **8 chunks / 3,000 evidence tokens**. Graph mode preserves complete path evidence
+before filling remaining slots with vector results. Graph queries have a **3-hop limit**,
+**20-path cap** and **2-second timeout**.
+
+Candidate Recall/Precision/MRR/nDCG are evaluated at K=5/10/20. Complete final-context
+evidence is scored separately. Humans judge correctness, faithfulness, citation support,
+coverage and abstention; a valid citation pointer does not prove its claim.
 
 ```sh
-uv sync --frozen --extra dev
-docker compose up -d --wait postgres neo4j
-uv run --env-file .env alembic upgrade head
-uv run --env-file .env nexusrag validate
-uv run --env-file .env nexusrag download-model
-uv run --env-file .env nexusrag ingest --fixture-graph
-uv run --env-file .env uvicorn nexusrag.api.app:app --host 127.0.0.1 --port 58000
-# In another terminal:
-uv run --env-file .env streamlit run src/nexusrag/ui.py --server.address 127.0.0.1 --server.port 58501
+# Free development diagnostic; explicitly permits draft labels and the fixture:
+docker compose exec -T api nexusrag evaluate --split dev --allow-unreviewed
 ```
 
-Do not run host API/UI and Compose API/UI simultaneously on the same ports. Set
-`HF_HUB_OFFLINE=1` after model download for offline retrieval. Paid extraction and generation
-always need provider access. Local `.env` configuration is loaded explicitly by `uv run`.
+The diagnostic tied; it does not demonstrate a graph advantage. The architecture diagram
+is available to both systems. Documented dependencies do not prove outage propagation.
 
-## Ingestion and querying
+## Documentation and remaining work
 
-The fixed [manifest](corpus/manifest.json) records all sources, hashes, attribution and license.
-The original Markdown is included, so ordinary ingestion does not fetch `main` or crawl links.
-`scripts/freeze_corpus.py` reproduces exactly that allowlisted commit. There are 128 chunks
-with exact line spans; Markdown page numbers are null. Every graph assertion contains exact
-source quotes, model/prompt metadata and review status. Keep exported JSONL to rebuild Neo4j:
+| Guide | Contents |
+| --- | --- |
+| [Architecture](docs/ARCHITECTURE.md) | Modules, storage, ingestion, retrieval and query lifecycle |
+| [Runbook](docs/RUNBOOK.md) | Installation, queries, Make commands, tests, inspection and recovery |
+| [Configuration](docs/CONFIGURATION.md) | Every supported environment variable and paid-use boundary |
+| [Troubleshooting](docs/TROUBLESHOOTING.md) | Likely setup and runtime failures |
+| [Final experiment](docs/FINAL-EXPERIMENT.md) | Reviewed LLM extraction, held-out runs and human scoring |
+| [Demo](docs/DEMO.md) | Three-minute portfolio walkthrough |
+| [Completion report](PROJECT_COMPLETION_REPORT.md) | Verified checks, audit findings and remaining limitations |
+| [Resume](docs/RESUME.md) | Quantified, evidence-backed project bullets |
 
-```sh
-docker compose exec api nexusrag ingest --assertions artifacts/INDEX_VERSION/assertions.jsonl
-# For a fixture export, add --fixture-graph to select that same index identity.
-```
+Before claiming the final result: independently review the 40 labels, run and review live
+LLM extraction, freeze settings, evaluate the 24 held-out questions, complete human judgments,
+and record the demo. These steps have not been completed.
 
-Re-ingestion is idempotent. Changed snapshot/model/chunker/aliases/extraction settings produce
-a new index version. Failed versions stay unavailable. Do not edit a ready snapshot in place.
-
-The UI has Ask/Compare, evidence/trace lookup and benchmark views. Compare sends two independent
-requests. Answers link to pinned original source lines. Graph paths are plain text, with semantic
-edge directions shown explicitly. Both modes use up to eight chunks and 3,000 evidence tokens.
-
-| Endpoint | Purpose |
-|---|---|
-| `GET /health`, `GET /ready` | Liveness and database/corpus readiness |
-| `GET /documents` | Active manifest and attribution |
-| `GET /chunks/{id}` | Active source chunk and line provenance |
-| `POST /ask` | `question`, `mode` (`vector` / `graph_vector`), optional `document_filter` |
-| `GET /queries/{id}` | Full answer, evidence and measurements |
-| `GET /queries/{id}/trace` | Observable stage records, fallback/error codes and timing |
-
-No upload, deletion, arbitrary Cypher, LLM router, reranker or evaluation-run HTTP API is included.
-
-## Evaluate honestly
-
-Forty source-checked **draft** labels are included: 16 development and 24 test. Independent human
-review is still required. Follow [evaluation/REVIEW.md](evaluation/REVIEW.md) before a release run.
-Without `--allow-unreviewed`, evaluation refuses unreviewed labels and fixture graphs.
-
-```sh
-# Only after human review and LLM ingestion; generation is explicitly opt-in:
-docker compose exec api nexusrag evaluate --split test --generate --repeats 3
-# Fill the generated judgments.csv by inspecting the cited claims, then:
-docker compose exec api nexusrag score results/runs/RUN_ID
-```
-
-Each run saves frozen configuration, raw paired outputs, retrieval metrics, timing summaries and
-a human-judgment sheet. Metrics include Recall/Precision/MRR/nDCG at K=5/10/20 for vector candidates,
-complete final-context evidence, entity/template matching and paired wins/ties/losses. Human
-judgments add answer correctness, faithfulness, citation support/coverage and abstention quality.
-No-answer evidence recall is null. P95 uses nearest rank with sample counts. Extraction usage is
-reported separately from query usage. A valid citation ID is not proof that its claim is true.
-
-## Verify
-
-```sh
-uv run ruff check src tests scripts migrations
-uv run ruff format --check src tests scripts migrations
-uv run mypy src
-uv run pytest -q
-RUN_INTEGRATION=1 uv run --env-file .env pytest -q tests/test_integration.py
-RUN_MODEL=1 HF_HUB_OFFLINE=1 uv run --env-file .env pytest -q -m model
-```
-
-Tests mock paid calls. Integration tests use unique temporary corpus IDs in NexusRAG's dedicated
-local databases and clean up only their own data. CI runs lint, types, unit/integration checks,
-schema validation and image builds; it never spends money on model evaluations.
-
-## Design and release status
-
-- [Technical design and architecture diagram](docs/design.md)
-- [Measured diagnostic and failure analysis](docs/report.md)
-- [Three-minute demo script](docs/demo.md)
-- [Corpus attribution and upstream license](corpus/ATTRIBUTION.md)
-
-The application and evaluation tooling are implemented. Remaining release work is explicit:
-configure the API key; run and review LLM extraction; independently review the forty gold labels;
-run the held-out answer comparison; fill human judgments; record the demo video; choose a public
-repository destination and tag the final measured release. No answer-quality improvement,
-finished video, public repository or release tag is claimed yet.
-
-Graph absence never proves real-world absence. Documented relationships do not prove outage
-propagation. The existing service overview can make vector retrieval highly competitive. This
-experiment compares graph augmentation against this vector baseline on this corpus only.
-
-Implementation references: [BGE model card](https://huggingface.co/BAAI/bge-small-en-v1.5),
-[pgvector](https://github.com/pgvector/pgvector),
-[OpenAI model snapshot](https://developers.openai.com/api/docs/models/gpt-5.4-mini),
-[structured output](https://developers.openai.com/api/docs/guides/structured-outputs), and
-[uv CPU PyTorch configuration](https://docs.astral.sh/uv/guides/integration/pytorch/).
+The project is designed for local use, not direct public deployment.
+Corpus material is attributed to the [OpenTelemetry Authors](corpus/ATTRIBUTION.md) under
+[CC-BY-4.0](corpus/UPSTREAM-LICENSE). An original-code license has not yet been selected.

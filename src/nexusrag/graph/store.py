@@ -115,13 +115,30 @@ class GraphStore:
 
     def ready(self, version: str) -> bool:
         with self.driver.session(default_access_mode="READ") as session:
-            return (
-                session.run(
-                    Query("MATCH (c:Corpus {version:$v}) RETURN c.assertion_count AS n", timeout=2),
-                    v=version,
-                ).single()
-                is not None
+            row = session.run(
+                Query(
+                    "MATCH (c:Corpus {version:$v}) "
+                    "OPTIONAL MATCH (:Entity {corpus_version:$v})-[r]->(:Entity {corpus_version:$v}) "
+                    "WHERE r.corpus_version=$v "
+                    "RETURN c.assertion_count AS expected, count(r) AS actual",
+                    timeout=2,
+                ),
+                v=version,
+            ).single()
+            return bool(row is not None and row["expected"] == row["actual"])
+
+    def assertions(self, version: str) -> list[Assertion]:
+        """Read stored provenance for this small corpus's readiness audit."""
+        with self.driver.session(default_access_mode="READ") as session:
+            rows = session.run(
+                Query(
+                    "MATCH (:Entity {corpus_version:$v})-[r]->(:Entity {corpus_version:$v}) "
+                    "WHERE r.corpus_version=$v RETURN r.payload AS payload",
+                    timeout=2,
+                ),
+                v=version,
             )
+            return [Assertion.model_validate_json(row["payload"]) for row in rows]
 
     def retrieve(self, plan: Plan, version: str) -> tuple[list[GraphPath], bool]:
         if plan.template_id is None or not plan.matched_entities:

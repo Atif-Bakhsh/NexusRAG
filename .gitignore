@@ -1,4 +1,14 @@
 .env
+.env.*
+!.env.example
+*.sqlite
+*.sqlite-*
+*.db
+*.log
+*.pem
+*.key
+*.tmp
+*.bak
 .venv/
 __pycache__/
 *.pyc

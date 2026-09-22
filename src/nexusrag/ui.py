@@ -28,7 +28,9 @@ try:
                 "Diagnostic graph fixture · LLM extraction has not run for this corpus."
             )
         if not ready.json().get("generation_configured"):
-            st.sidebar.warning("Set OPENAI_API_KEY in .env to generate answers.")
+            st.sidebar.warning(
+                "Generation disabled: configure OPENAI_API_KEY and DISABLE_PAID_API=false for the live experiment."
+            )
     else:
         st.sidebar.warning("Corpus not ready. Run ingestion from the README.")
 except httpx.HTTPError:
@@ -128,6 +130,9 @@ elif view == "Evidence and execution":
             st.error("API unavailable")
 else:
     reports = sorted(Path("results/runs").glob("*/summary.json"))
+    diagnostic = Path("results/development-diagnostic/summary.json")
+    if diagnostic.exists():
+        reports.insert(0, diagnostic)
     if not reports:
         st.info(
             "No measured benchmark yet. Run the evaluation CLI; human judgments are reported separately."

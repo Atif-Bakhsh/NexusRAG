@@ -1,5 +1,8 @@
 # NexusRAG technical design
 
+For the maintained implementation walkthrough, see [ARCHITECTURE.md](ARCHITECTURE.md).
+For current setup and verification, see [RUNBOOK.md](RUNBOOK.md).
+
 NexusRAG compares vector retrieval with graph-augmented retrieval over the same twelve
 frozen Astronomy Shop Markdown documents. Neo4j is a learning choice; this graph does
 not require a separate database for scale. The system does not run Astronomy Shop.

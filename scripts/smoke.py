@@ -2,7 +2,7 @@
 
 import json
 import subprocess
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 
 def cli(*args):
@@ -46,6 +46,21 @@ def main():
             f"http://127.0.0.1:58000/queries/{result['query_id']}", timeout=10
         ) as response:
             assert json.load(response)["query_id"] == result["query_id"]
+        request = Request(
+            "http://127.0.0.1:58000/ask?generate=false",
+            data=json.dumps(
+                {"question": "Trace Frontend → Checkout → Shipping → Quote.", "mode": mode}
+            ).encode(),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urlopen(request, timeout=90) as response:
+            result = json.load(response)
+        assert result["status"] == "completed" and result["evidence"]
+        assert result["answer"] is None and not result["generation_requested"]
+        assert result["trace"]["calls"] == [] and result["trace"]["estimated_cost_usd"] == 0
+        if mode == "graph_vector":
+            assert result["paths"] and not result["trace"]["errors"]
     for url in (
         "http://127.0.0.1:58000/health",
         "http://127.0.0.1:58000/ready",
@@ -56,7 +71,7 @@ def main():
         with urlopen(url, timeout=10) as response:
             assert response.status == 200
     print(
-        "PASS: preflight, both retrieval modes, graph provenance, query records, API and UI health; zero paid calls"
+        "PASS: preflight, CLI and HTTP retrieval in both modes, graph provenance, query records, API and UI health; zero paid calls"
     )
 
 

@@ -56,7 +56,7 @@ ingestion and evaluation, or add an explicit Compose override. Editing a host-on
 | Variable | Required? / default | Purpose / safe value / paid usage |
 | --- | --- | --- |
 | POSTGRES_PASSWORD | Optional; nexusrag-local-only | Compose database and API authentication; free. Keep host DATABASE_URL consistent if changed |
-| API_BASE_URL | Optional; http://127.0.0.1:58000 | Host Streamlit backend; Compose sets http://api:8000; UI Ask may generate paid calls only if server permits |
+| API_BASE_URL | Optional; http://127.0.0.1:58000 | Host Streamlit backend; Compose sets http://api:8000; UI defaults to free evidence search, with paid generation requiring explicit selection and server configuration |
 | HF_HOME | Optional library cache; example .cache/huggingface | Local model cache; Compose /app/.cache/huggingface; no API charge |
 | HF_HUB_OFFLINE | Optional; unset | Set 1 after download to avoid Hugging Face network requests; unset for download-model |
 | HF_TOKEN | Optional library setting; unset | Not needed for this public model; may increase free download limits; never commit a token |

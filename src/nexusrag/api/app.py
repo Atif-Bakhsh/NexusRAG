@@ -76,11 +76,11 @@ def chunk(chunk_id: str):
 
 
 @app.post("/ask")
-def ask(request: AskRequest):
+def ask(request: AskRequest, generate: bool = True):
     if not query_lock.acquire(blocking=False):
         raise HTTPException(429, "One query at a time; retry after the current query finishes")
     try:
-        result = service().ask(request)
+        result = service().ask(request, generate=generate)
         if result["status"] == "failed":
             raise HTTPException(502, {"query_id": result["query_id"], "message": result["error"]})
         return result

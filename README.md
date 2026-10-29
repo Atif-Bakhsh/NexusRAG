@@ -59,12 +59,14 @@ docker compose exec -T api nexusrag ask \
   --mode graph_vector --retrieval-only
 ```
 
-Inspect returned evidence, paths and the query ID. Open [Streamlit](http://127.0.0.1:58501)
-to load that ID in **Evidence and execution**, or view the committed diagnostic in
-**Benchmark results**. [API docs](http://127.0.0.1:58000/docs) expose the seven endpoint patterns.
+Open [Streamlit](http://127.0.0.1:58501) and use **Ask / Compare** to search for evidence
+in either mode or compare both. Evidence search is the default and needs no API key.
+Inspect source passages, graph paths and timings, load a saved query ID in
+**Evidence and execution**, or view the committed diagnostic in **Benchmark results**.
+[API docs](http://127.0.0.1:58000/docs) expose the seven endpoint patterns;
+`POST /ask?generate=false` provides the same free search over HTTP.
 
-The UI's Ask/Compare flow generates answers and needs explicit live configuration.
-The free CLI retrieves real evidence without fabricating an answer.
+The UI's optional **Generate an answer** control requires live configuration and explicit selection.
 Stop with `docker compose down`; database/model volumes and artifacts remain.
 
 ## How the experiment is evaluated
@@ -97,6 +99,7 @@ is available to both systems. Documented dependencies do not prove outage propag
 | [Final experiment](docs/FINAL-EXPERIMENT.md) | Reviewed LLM extraction, held-out runs and human scoring |
 | [Demo](docs/DEMO.md) | Three-minute portfolio walkthrough |
 | [Completion report](PROJECT_COMPLETION_REPORT.md) | Verified checks, audit findings and remaining limitations |
+| [Project state](docs/PROJECT-STATE.md) | Current implementation, verification and next milestones |
 | [Resume](docs/RESUME.md) | Quantified, evidence-backed project bullets |
 
 Before claiming the final result: independently review the 40 labels, run and review live

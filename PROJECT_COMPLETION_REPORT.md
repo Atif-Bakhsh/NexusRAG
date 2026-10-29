@@ -1,5 +1,8 @@
 # Project completion report
 
+For the current implementation and remaining milestones, see [Project state](docs/PROJECT-STATE.md).
+The verification below describes the September readiness pass.
+
 Verified on 2026-09-22. This pass prepares NexusRAG for the **local live experiment**.
 It does not certify a public production service or claim the final experiment is complete.
 

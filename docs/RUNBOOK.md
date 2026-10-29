@@ -82,8 +82,20 @@ curl --fail http://127.0.0.1:58000/queries/QUERY_ID
 curl --fail http://127.0.0.1:58000/queries/QUERY_ID/trace
 ```
 
-POST /ask has no retrieval-only option and normally generates an answer. After explicitly
-enabling the later live experiment:
+For free evidence search, pass `generate=false` as a query parameter:
+
+```sh
+curl --fail-with-body 'http://127.0.0.1:58000/ask?generate=false' \
+  -H 'Content-Type: application/json' \
+  -d '{"question":"How does Checkout reach Quote through Shipping?","mode":"graph_vector"}'
+```
+
+The response includes the same evidence, paths, query ID and trace as the retrieval-only CLI.
+It records `generation_requested=false` and zero provider calls. A deterministic clarification
+may still be returned for ambiguous phrasing.
+
+Omitting the parameter preserves the API's existing answer-generation behavior. After
+explicitly enabling the later live experiment:
 
 ```sh
 curl --fail-with-body http://127.0.0.1:58000/ask \
@@ -91,9 +103,10 @@ curl --fail-with-body http://127.0.0.1:58000/ask \
   -d '{"question":"What is Checkout responsible for?","mode":"vector","document_filter":["checkout","services"]}'
 ```
 
-The UI's Ask/Compare view uses this endpoint; Compare makes two independent requests.
-With generation disabled, use retrieval-only CLI and the UI record lookup. The Benchmark view
-also shows the committed development diagnostic on a fresh clone.
+The UI's Ask/Compare view defaults to free evidence search; Compare makes two independent
+requests. Enable **Generate an answer (uses paid API)** to request answers when the server
+reports generation configured. The Benchmark view also shows the committed development
+diagnostic on a fresh clone.
 
 ## Host Python development
 

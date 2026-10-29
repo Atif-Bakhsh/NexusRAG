@@ -19,7 +19,7 @@ http://127.0.0.1:58501 and keep .env and secrets out of the recording.
 | 0:00–0:25 | README, manifest and architecture | “I built a controlled retrieval experiment over 12 pinned architecture documents, comparing two evidence-retrieval modes.” |
 | 0:25–0:55 | Vector CLI query below | “The vector baseline finds semantically related source passages using normalized 384-dimensional BGE embeddings.” |
 | 0:55–1:35 | Graph-vector query below; load its query ID in Evidence and execution | Expand the path and original passages. “Every hop has exact source provenance; at most three hops and two selected paths.” |
-| 1:35–2:00 | Run the same relationship question in both CLI modes | Compare independently retrieved evidence. During the later live demo, use UI Compare to show two independently generated answers and clickable citations. |
+| 1:35–2:00 | Select Compare in the UI and click Find evidence for the same relationship question | Compare independently retrieved passages and graph paths. Evidence search needs no API key. During the later live demo, explicitly enable Generate an answer to compare generated answers and clickable citations. |
 | 2:00–2:30 | Benchmark results and docs/report.md | “Both modes found complete labeled evidence for 11 of 12 answerable development questions. Four other questions test ambiguity or unsupported conclusions. This used a fixture graph and draft labels.” |
 | 2:30–3:00 | Frontend-login miss and known limitations | “One lookup misses its supporting overview row. Graph evidence is not always better; a citation pointer also does not prove a claim. Live extraction and human-scored held-out answers are the next experiment.” |
 

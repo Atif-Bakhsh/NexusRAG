@@ -28,7 +28,7 @@ flowchart LR
 ```
 
 The OpenAI API is the only paid integration. Embeddings run on CPU. The basic workflow uses
-the fixture graph and retrieval-only CLI, with paid calls disabled. The architecture has no
+the fixture graph and retrieval-only CLI/API/UI, with paid calls disabled. The architecture has no
 router LLM, agent framework, queue, crawler, reranker or extra vector store.
 
 ## Repository map
@@ -186,8 +186,11 @@ sequenceDiagram
     A-->>U: Render citations and execution details
 ```
 
-Compare is two independent ordinary HTTP requests. The HTTP endpoint generates answers;
-retrieval-only is currently a CLI option. The API serializes requests with a lock and returns
+Compare is two independent ordinary HTTP requests. The UI defaults to evidence search via
+`POST /ask?generate=false`; generation requires explicit selection and server configuration.
+Omitting the API parameter retains answer generation for existing clients. Retrieval-only
+records contain evidence, paths and traces, plus a deterministic clarification if applicable.
+The API serializes requests with a lock and returns
 429 when busy. Liveness is `/health`; database/corpus readiness is `/ready`; comprehensive
 model/migration/provenance checks are `nexusrag preflight`. Query records omit credentials and
 hidden chain-of-thought, but do contain questions and source text.

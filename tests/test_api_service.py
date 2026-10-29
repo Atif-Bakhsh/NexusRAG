@@ -140,6 +140,35 @@ def test_api_paid_disabled_returns_failure_record_and_releases_lock(fake_service
     assert not client.get("/ready").json()["generation_configured"]
 
 
+@pytest.mark.parametrize("mode", ["vector", "graph_vector"])
+def test_api_retrieval_only_succeeds_without_provider_and_persists_record(fake_service, mode):
+    _, records = fake_service
+    client = TestClient(app)
+    response = client.post(
+        "/ask?generate=false", json={"question": "What is Checkout?", "mode": mode}
+    )
+    assert response.status_code == 200
+    result = response.json()
+    assert result["status"] == "completed" and result["evidence"]
+    assert result["answer"] is None and not result["generation_requested"]
+    assert result["trace"]["calls"] == [] and result["trace"]["estimated_cost_usd"] == 0
+    assert result["trace"]["citation_validation"] == "retrieval_only"
+    assert records[result["query_id"]] == result
+    assert client.get(f"/queries/{result['query_id']}").json() == result
+
+
+def test_api_retrieval_only_preserves_deterministic_clarification(fake_service):
+    client = TestClient(app)
+    response = client.post(
+        "/ask?generate=false",
+        json={"question": "What is upstream of Checkout?", "mode": "graph_vector"},
+    )
+    assert response.status_code == 200
+    result = response.json()
+    assert result["answer"]["status"] == "clarification_needed"
+    assert result["trace"]["calls"] == [] and not result["generation_requested"]
+
+
 def test_api_busy_and_unready_fail_explicitly(fake_service, monkeypatch):
     from nexusrag.api.app import query_lock
 

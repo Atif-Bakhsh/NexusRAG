@@ -25,7 +25,7 @@ Do not publish .env, expanded Compose configuration, or logs containing connecti
 | Graph count/provenance mismatch | preflight graph_state; Neo4j inspection queries | Rebuild with the matching validated export or fixture ingestion. Keep prior artifacts. Do not mark a corrupt graph ready manually |
 | Streamlit cannot contact FastAPI | /health and API_BASE_URL | Host UI uses 127.0.0.1:58000; container UI uses http://api:8000. Recreate ui after configuration changes |
 | HTTP 429 | Another query is running | Wait for that request to finish, then retry. CLI evaluation should run at concurrency one |
-| HTTP 502 from /ask | GET /queries/ID/trace from error's query ID | Generation failed or is disabled. Inspect sanitized stage errors; use retrieval-only CLI for the free workflow |
+| HTTP 502 from /ask | GET /queries/ID/trace from error's query ID | Generation failed or is disabled. Inspect sanitized stage errors; use /ask?generate=false, the UI's default evidence search, or retrieval-only CLI for the free workflow |
 | Settings changed but container ignores them | Compare CONFIGURATION.md forwarding list | Recreate api for forwarded variables. Other settings need explicit exec -e or a Compose override |
 | Changed DB password with old volumes | Authentication fails despite healthy process | Initialization environment does not rotate stored passwords. Restore the existing credentials or follow a deliberate reset after backup |
 | Stale volumes/index version | PostgreSQL corpora and Neo4j Corpus markers | Latest created ready corpus is active. Rebuild with matching settings; use RUNBOOK's destructive reset only after preserving data |

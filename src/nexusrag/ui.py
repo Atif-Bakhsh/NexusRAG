@@ -19,6 +19,7 @@ st.title("NexusRAG")
 st.caption("Comparing Vector and Knowledge-Graph Retrieval for Architecture Documentation")
 st.sidebar.caption("LOCAL EXPERIMENT · ASTRONOMY SHOP")
 view = st.sidebar.radio("View", ["Ask / Compare", "Evidence and execution", "Benchmark results"])
+generation_configured = False
 try:
     ready = httpx.get(f"{API}/ready", timeout=6)
     if ready.is_success:
@@ -27,10 +28,9 @@ try:
             st.sidebar.info(
                 "Diagnostic graph fixture · LLM extraction has not run for this corpus."
             )
-        if not ready.json().get("generation_configured"):
-            st.sidebar.warning(
-                "Generation disabled: configure OPENAI_API_KEY and DISABLE_PAID_API=false for the live experiment."
-            )
+        generation_configured = bool(ready.json().get("generation_configured"))
+        if not generation_configured:
+            st.sidebar.info("Answer generation unavailable. Evidence search is ready to use.")
     else:
         st.sidebar.warning("Corpus not ready. Run ingestion from the README.")
 except httpx.HTTPError:
@@ -43,6 +43,8 @@ def render(result):
         return
     answer = result.get("answer")
     evidence = {c["chunk_id"]: c for c in result["evidence"]}
+    if not result.get("generation_requested", True):
+        st.info("Evidence search only · no answer was generated and no paid API calls were made.")
     if answer:
         st.caption(answer["status"].replace("_", " ").upper())
         for statement in answer["statements"]:
@@ -90,7 +92,19 @@ if view == "Ask / Compare":
     )
     mode = st.radio("Retrieval mode", ["Vector", "Graph + Vector", "Compare"], horizontal=True)
     st.caption("Compare runs two independent requests with identical evidence budgets.")
-    if st.button("Find evidence and answer", type="primary", disabled=len(question.strip()) < 3):
+    generate = (
+        st.checkbox(
+            "Generate an answer (uses paid API)",
+            value=False,
+            disabled=not generation_configured,
+        )
+        and generation_configured
+    )
+    if st.button(
+        "Find evidence and answer" if generate else "Find evidence",
+        type="primary",
+        disabled=len(question.strip()) < 3,
+    ):
         modes = (
             ["vector", "graph_vector"]
             if mode == "Compare"
@@ -98,10 +112,14 @@ if view == "Ask / Compare":
         )
         results = []
         for selected in modes:
-            with st.spinner(f"Retrieving and generating · {selected}"):
+            action = "Retrieving and generating" if generate else "Finding evidence"
+            with st.spinner(f"{action} · {selected}"):
                 try:
                     response = httpx.post(
-                        f"{API}/ask", json={"question": question, "mode": selected}, timeout=150
+                        f"{API}/ask",
+                        params={"generate": str(generate).lower()},
+                        json={"question": question, "mode": selected},
+                        timeout=150,
                     )
                     if response.is_success:
                         results.append(response.json())
